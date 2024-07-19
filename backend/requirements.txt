@@ -1,0 +1,15 @@
+fastapi
+pydantic
+uvicorn
+python-dotenv
+pyyaml
+asyncpg
+psycopg2
+pandas
+pymilvus
+llama-index
+llama-index-embeddings-huggingface
+llama-index-vector-stores-milvus
+llama-index-llms-ollama
+llama-index-llms-groq
+llama-index-vector-stores-milvus

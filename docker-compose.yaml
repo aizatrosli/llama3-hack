@@ -44,6 +44,7 @@ services:
     security_opt:
     - seccomp:unconfined
     environment:
+      - TZ=Asia/Kuala_Lumpur
       - ETCD_ENDPOINTS=etcd:2379
       - MINIO_ADDRESS=minio:9000
       - MINIO_ACCESS_KEY_ID=${MINIO_ACCESS_KEY}
@@ -91,6 +92,44 @@ services:
               count: 1
               capabilities: [gpu]
 
+  langfuse-server:
+    image: langfuse/langfuse:2
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+      - DATABASE_URL=postgresql://${POSTGRESS_USER}:${POSTGRESS_PASS}@db:5432/${POSTGRESS_DB}
+      - NEXTAUTH_SECRET=${LANGFUSE_PASS}
+      - SALT=mysalt
+      - NEXTAUTH_URL=http://localhost:3000
+      - TELEMETRY_ENABLED=${TELEMETRY_ENABLED:-true}
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
+    #volumes:
+    #  - ${PERSISTENCE_PATH}/langfuse_data:/root/.ollama
+
+  db:
+    image: postgres
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    #volumes:
+    #  - ${PERSISTENCE_PATH}/db_data:/var/lib/postgresql/data:Z
+
+
   backend:
     volumes:
       - ./backend:/root/backend
@@ -115,3 +154,5 @@ volumes:
   minio_data:
   etcd_data:
   ollama_data:
+  db_data:
+    driver: local

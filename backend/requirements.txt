@@ -14,3 +14,4 @@ llama-index-llms-ollama
 llama-index-llms-groq
 llama-index-embeddings-jinaai
 langfuse
+FlagEmbedding

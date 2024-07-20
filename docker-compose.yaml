@@ -94,6 +94,7 @@ services:
 
   langfuse-server:
     image: langfuse/langfuse:2
+    container_name: langfuse-server
     depends_on:
       db:
         condition: service_healthy
@@ -113,6 +114,7 @@ services:
   db:
     image: postgres
     restart: always
+    container_name: postgres_db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
@@ -120,14 +122,15 @@ services:
       retries: 10
     environment:
       - TZ=Asia/Kuala_Lumpur
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=${POSTGRESS_USER}
+      - POSTGRES_PASSWORD=${POSTGRESS_PASS}
+      - POSTGRES_DB=${POSTGRESS_DB}
+      #- PGDATA=/var/lib/postgresql/data/pgdata
+    #user: 1000:1000
     ports:
       - 5432:5432
-    #volumes:
-    #  - ${PERSISTENCE_PATH}/db_data:/var/lib/postgresql/data:Z
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
 
   backend:
@@ -139,6 +142,12 @@ services:
       dockerfile: ./backend/Dockerfile
     environment:
       - TZ=Asia/Kuala_Lumpur
+      - LANGFUSE_URL=http://langfuse-server:3000
+      - MILVUS_URL=http://standalone:19530
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - JINAAI_API_KEY=${JINAAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
       - "ollama"
       - "standalone"
@@ -155,4 +164,4 @@ volumes:
   etcd_data:
   ollama_data:
   db_data:
-    driver: local
+    external: true

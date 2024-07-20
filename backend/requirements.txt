@@ -12,4 +12,4 @@ llama-index-embeddings-huggingface
 llama-index-vector-stores-milvus
 llama-index-llms-ollama
 llama-index-llms-groq
-llama-index-vector-stores-milvus
+llama-index-embeddings-jinaai
